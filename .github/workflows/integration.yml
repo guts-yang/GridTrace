@@ -1,0 +1,53 @@
+name: Integration
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+
+jobs:
+  integration:
+    name: integration tests (PostgreSQL + pgvector)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: quark_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d quark_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql+psycopg://postgres:test@localhost:5432/quark_test
+      GRIDTRACE_STORAGE_BACKEND: postgres
+      EMBEDDING_DIM: "64"
+      LLM_PROVIDER: echo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Init schema
+        run: |
+          PGPASSWORD=test psql -h localhost -U postgres -d quark_test \
+            -f docker/init.sql
+
+      - name: Run integration tests
+        run: uv run pytest tests/integration/ -v

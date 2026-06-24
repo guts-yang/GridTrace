@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: gridtrace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: gridtrace
+    ports:
+      - "5432:5432"
+    volumes:
+      - gridtrace_pgdata:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gridtrace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: gridtrace-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/gridtrace
+      GRIDTRACE_STORAGE_BACKEND: postgres
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-zh-v1.5}
+      EMBEDDING_DEVICE: ${EMBEDDING_DEVICE:-cpu}
+      LLM_PROVIDER: ${LLM_PROVIDER:-echo}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
+
+volumes:
+  gridtrace_pgdata:

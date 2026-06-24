@@ -1,0 +1,45 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+*.egg
+.installed.cfg
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Environment / runtime
+.env
+.env.local
+*.log
+
+# Data
+data/quark.db
+data/quark.db-wal
+data/quark.db-shm
+data/embeddings_cache/
+models/

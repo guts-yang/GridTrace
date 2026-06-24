@@ -1,0 +1,70 @@
+# syntax=docker/dockerfile:1.7
+
+# ─── Builder ────────────────────────────────────────────────
+FROM python:3.11-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /build
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        libpq-dev \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Copy only manifest first for layer caching
+COPY pyproject.toml ./
+COPY gridtrace/__init__.py ./gridtrace/__init__.py
+COPY api/__init__.py ./api/__init__.py
+
+# Pre-install dependencies into a relocatable venv
+RUN uv venv /opt/venv && \
+    uv pip install --python /opt/venv/bin/python \
+        "fastapi>=0.115" \
+        "uvicorn[standard]>=0.30" \
+        "sqlalchemy>=2.0" \
+        "psycopg[binary]>=3.1" \
+        "pgvector>=0.3" \
+        "pydantic>=2.9" \
+        "pydantic-settings>=2.5" \
+        "httpx>=0.27" \
+        "numpy>=1.26" \
+        "tenacity>=8.2" \
+        "sentence-transformers>=3.0"
+
+# ─── Runtime ────────────────────────────────────────────────
+FROM python:3.11-slim AS runtime
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/opt/venv/bin:${PATH}" \
+    GRIDTRACE_STORAGE_BACKEND=postgres
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libpq5 \
+        tini \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd --create-home --shell /bin/bash gridtrace
+
+WORKDIR /app
+COPY --from=builder /opt/venv /opt/venv
+COPY . /app
+
+RUN chown -R gridtrace:gridtrace /app
+USER gridtrace
+
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD python -c "import httpx; httpx.get('http://localhost:8000/api/health', timeout=3.0).raise_for_status()"
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["uvicorn", "api.server:app", "--host", "0.0.0.0", "--port", "8000"]
