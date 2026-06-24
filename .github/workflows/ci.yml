@@ -41,7 +41,7 @@ jobs:
         run: uv run pytest tests/unit/ tests/eval/ -v --cov=gridtrace --cov-report=xml
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         if: always()
         with:
           file: coverage.xml
