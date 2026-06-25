@@ -1,45 +1,43 @@
-# ─── Python ───────────────────────────────────────────────
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
+*.pyc
+*.pyo
 
 # Distribution / packaging
-.Python
-.venv/
-venv/
-env/
-ENV/
 build/
 dist/
 *.egg-info/
 *.egg
-.installed.cfg
+.eggs/
 
-# Testing / coverage
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Test / coverage artifacts
 .pytest_cache/
 .coverage
 .coverage.*
 htmlcov/
 coverage.xml
-.tox/
 .mypy_cache/
 .ruff_cache/
 
-# IDE
-.idea/
+# Editor / OS
 .vscode/
-*.swp
+.idea/
 .DS_Store
+Thumbs.db
 
-# Environment / runtime
+# Environment & secrets
 .env
 .env.local
-*.log
+.env.*.local
 
-# Data
-data/quark.db
-data/quark.db-wal
-data/quark.db-shm
-data/embeddings_cache/
-models/
+# Logs
+*.log
+logs/
