@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/head.png" alt="GridTrace" width="800">
+  <img src="docs/images/image.png" alt="GridTrace" width="800">
 </p>
 <p align="center">
   <strong>GridTrace</strong> — Trace the path through the grid
