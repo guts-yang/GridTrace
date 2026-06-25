@@ -1,10 +1,14 @@
 <p align="center">
   <img src="docs/images/image.png" alt="GridTrace" width="800">
 </p>
-<p align="center">
-  <strong>GridTrace</strong> — Trace the path through the grid
+
+<h1 align="center" style="font-size: 72px; font-weight: 800; margin: 12px 0 4px 0;">
+  GridTrace
+</h1>
+<p align="center" style="font-size: 22px; margin: 0 0 6px 0;">
+  <strong>Trace the path through the grid</strong>
 </p>
-<p align="center">
+<p align="center" style="font-size: 16px; color: #666; margin: 0 0 20px 0;">
   <em>Retrieval at the fundamental particle scale</em>
 </p>
 
